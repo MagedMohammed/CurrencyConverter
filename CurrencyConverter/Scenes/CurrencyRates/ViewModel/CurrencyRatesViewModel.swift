@@ -19,11 +19,11 @@ class CurrencyRatesViewModel {
     private var currencyViewModels = [CurrencyRateViewModel]()
     private(set) var baseCurrency: CurrencyRateViewModel?
     
-    var currencyList: BehaviorRelay<[CurrencyRateViewModel]> = .init(value: [])
-    var currentCurrency: BehaviorRelay<CurrencyRateViewModel?> = .init(value: nil)
-    var isLoading: PublishSubject<Bool> = .init()
-    var error: PublishSubject<String> = .init()
-    var didSelectCurrency: PublishSubject<CurrencyRateViewModel> = .init()
+    private(set) var currencyList: BehaviorRelay<[CurrencyRateViewModel]> = .init(value: [])
+    private(set) var currentCurrency: BehaviorRelay<CurrencyRateViewModel?> = .init(value: nil)
+    private(set) var isLoading: PublishSubject<Bool> = .init()
+    private(set) var error: PublishSubject<String> = .init()
+    private(set) var didSelectCurrency: PublishSubject<CurrencyRateViewModel> = .init()
     
     init() {
         observeChanges()
@@ -51,10 +51,10 @@ class CurrencyRatesViewModel {
     }
     
     private func observeChanges() {
-        didSelectCurrency.subscribe(onNext: { [weak self] currencyRate in
-            guard let self = self else { return }
-            self.calculateCurrencyPrices(against: currencyRate)
-        }).disposed(by: disposeBag)
+        didSelectCurrency
+            .map(calculateCurrencyPrices(against:))
+            .subscribe()
+            .disposed(by: disposeBag)
     }
     
     private func calculateCurrencyPrices(against selectedCurrency: CurrencyRateViewModel) {

@@ -104,7 +104,8 @@ class CurrencyRatesView: UIView, UITextFieldDelegate {
         currencyView.addGestureRecognizer(currencyViewTapGesture)
     }
     
-    func configure(model: CurrencyRateViewModel) {
+    func configure(model: CurrencyRateViewModel?) {
+        guard let model = model else { return }
         flagImageView.image = UIImage(named: model.flagCode) ?? UIImage(named: "blankflag")
         currencyTitleLabel.text = model.title
     }

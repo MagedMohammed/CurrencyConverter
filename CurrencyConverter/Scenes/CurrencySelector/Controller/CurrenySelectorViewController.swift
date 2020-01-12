@@ -15,7 +15,7 @@ class CurrencySelectorViewController: UIViewController {
     private let mainView = CurrencySelectorView(frame: UIScreen.main.bounds)
     
     private let currencyList: BehaviorRelay<[CurrencyRateViewModel]>
-    var didSelectCurrency: PublishSubject<CurrencyRateViewModel> = .init()
+    private(set) var didSelectCurrency: PublishSubject<CurrencyRateViewModel> = .init()
     
     private let disposeBag = DisposeBag()
     
@@ -50,14 +50,15 @@ class CurrencySelectorViewController: UIViewController {
             .currenciesTableView
             .rx
             .modelSelected(CurrencyRateViewModel.self)
-            .subscribe(onNext: { [weak self] model in
-                guard let self = self else { return }
-                self.didSelectCurrency.onNext(model)
-                self.dismiss(animated: true, completion: nil)
-            })
+            .map(didSelectCurrency(selectedCurrency:))
+            .subscribe()
             .disposed(by: disposeBag)
     }
     
+    private func didSelectCurrency(selectedCurrency: CurrencyRateViewModel) {
+        didSelectCurrency.onNext(selectedCurrency)
+        dismiss(animated: true, completion: nil)
+    }
 }
 
 extension CurrencySelectorViewController {

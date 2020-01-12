@@ -40,9 +40,8 @@ class CurrencyRatesViewController: UIViewController {
         
         viewModel
             .error
-            .subscribe(onNext: { error in
-                self.showAlert(with: error)
-            })
+            .map(self.showAlert(with:))
+            .subscribe()
             .disposed(by: disposeBag)
         
         viewModel
@@ -56,32 +55,43 @@ class CurrencyRatesViewController: UIViewController {
         viewModel
             .currentCurrency
             .asDriver()
-            .drive(onNext: { [weak self] model in
-                guard let self = self, let model = model else { return }
-                self.mainView.configure(model: model)
-            })
+            .map(self.mainView.configure(model:))
+            .drive()
             .disposed(by: disposeBag)
         
         mainView
             .currenciesTableView
             .rx
             .modelSelected(CurrencyRateViewModel.self)
-            .subscribe(onNext: { [weak self] model in
-                guard let self = self, let baseCurrency = self.viewModel.baseCurrency else { return }
-                DispatchQueue.main.async {
-                    self.present(CurrencyConverterViewController.create(baseCurrency: baseCurrency, selectedCurrency: model), requiresFullScreen: false)
-                }
-            }).disposed(by: disposeBag)
+            .map(navigateToCurrencyConverterViewController(selectedCurrency:))
+            .subscribe()
+            .disposed(by: disposeBag)
         
-        mainView.currencyViewTapGesture.rx.event.subscribe(onNext: { [weak self] _ in
-            guard let self = self else { return }
-            let currencySelectorViewController = CurrencySelectorViewController.create(currencyList: self.viewModel.currencyList)
-            currencySelectorViewController
-                .didSelectCurrency
-                .bind(to: self.viewModel.didSelectCurrency)
-                .disposed(by: self.disposeBag)
-            self.present(currencySelectorViewController, requiresFullScreen: false)
-        }).disposed(by: disposeBag)
+        mainView
+            .currencyViewTapGesture
+            .rx
+            .event
+            .map(navigateToCurrencySelectorViewController(_:))
+            .subscribe()
+            .disposed(by: disposeBag)
+    }
+    
+    private func navigateToCurrencyConverterViewController(selectedCurrency: CurrencyRateViewModel) {
+        guard let baseCurrency = viewModel.baseCurrency else { return }
+        DispatchQueue.main.async {
+            self.present(CurrencyConverterViewController.create(baseCurrency: baseCurrency, selectedCurrency: selectedCurrency), requiresFullScreen: false)
+        }
+    }
+    
+    private func navigateToCurrencySelectorViewController(_ tapGesture: UITapGestureRecognizer) {
+        let currencySelectorViewController = CurrencySelectorViewController(currencyList: viewModel.currencyList)
+        
+        currencySelectorViewController
+            .didSelectCurrency
+            .bind(to: viewModel.didSelectCurrency)
+            .disposed(by: disposeBag)
+        
+        self.present(currencySelectorViewController, requiresFullScreen: false)
     }
     
 }
