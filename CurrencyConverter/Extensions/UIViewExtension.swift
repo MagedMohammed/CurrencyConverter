@@ -40,19 +40,17 @@ extension UIView {
     }
     
     private func constraint(firstAnchor: NSLayoutYAxisAnchor, with secondAnchor: NSLayoutYAxisAnchor, padding: CGFloat, relation: NSLayoutConstraint.Relation? = nil) -> NSLayoutConstraint {
-        return firstAnchor.constraint(equalTo: secondAnchor, constant: padding)
-
-//        let relation = relation ?? .equal
-//        switch relation {
-//        case .equal:
-//            return firstAnchor.constraint(equalTo: secondAnchor, constant: padding)
-//        case .greaterThanOrEqual:
-//            return firstAnchor.constraint(greaterThanOrEqualTo: secondAnchor, constant: padding)
-//        case .lessThanOrEqual:
-//            return firstAnchor.constraint(lessThanOrEqualTo: secondAnchor, constant: padding)
-//        @unknown default:
-//            fatalError()
-//        }
+        let relation = relation ?? .equal
+        switch relation {
+        case .equal:
+            return firstAnchor.constraint(equalTo: secondAnchor, constant: padding)
+        case .greaterThanOrEqual:
+            return firstAnchor.constraint(greaterThanOrEqualTo: secondAnchor, constant: padding)
+        case .lessThanOrEqual:
+            return firstAnchor.constraint(lessThanOrEqualTo: secondAnchor, constant: padding)
+        @unknown default:
+            assert(false, "Unknown constriant case")
+        }
     }
     
     private func constraint(firstAnchor: NSLayoutXAxisAnchor, with secondAnchor: NSLayoutXAxisAnchor, padding: CGFloat, relation: NSLayoutConstraint.Relation? = nil) -> NSLayoutConstraint {
