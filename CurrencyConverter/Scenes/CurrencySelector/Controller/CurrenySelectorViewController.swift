@@ -50,8 +50,9 @@ class CurrencySelectorViewController: UIViewController {
             .currenciesTableView
             .rx
             .modelSelected(CurrencyRateViewModel.self)
+            .asDriver()
             .map(didSelectCurrency(selectedCurrency:))
-            .subscribe()
+            .drive()
             .disposed(by: disposeBag)
     }
     
